@@ -132,7 +132,7 @@ function websocketLoop()
 		WebSocketFile.close()
 	end
 
-	local ws, err = http.websocket("ws://".. WebsocketServer .."/turtle")
+	local ws, err = http.websocket("ws://".. WebsocketServer)
 	if err then
 		print("Connection failed: " .. err)
 		ConnectionStatus = false
@@ -189,11 +189,11 @@ while true do
 	local status, res = pcall(websocketLoop)
 	turtle.refuel(64)
 	term.clear()
-	term.setCursorPos(1,1)
-	if res == 'Terminated' then
+	term.setCursorPos(1, 1)
+	if res == "Terminated" then
 		print("Imperial Turtle Control OS")
 		print("STATUS: OFFLINE")
-		print("Imperial Turtle Control OS terminated!")
+		print("Imperial Turtle Control OS Terminated!")
 		break
 	end
 	if ConnectionStatus == false then
