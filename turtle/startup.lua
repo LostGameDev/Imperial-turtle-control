@@ -192,29 +192,33 @@ function websocketLoop()
 	end
 end
 
-while true do
-	local status, res = pcall(websocketLoop)
+function main()
 	turtle.refuel(64)
 	term.clear()
 	term.setCursorPos(1, 1)
-	if res == "Terminated" then
-		print("Imperial Turtle Control OS")
-		print("STATUS: OFFLINE")
-		print("Imperial Turtle Control OS Terminated!")
-		break
-	end
-	if ConnectionStatus == false then
-		FailedToConnectAmount = FailedToConnectAmount + 1
-		print("Imperial Turtle Control OS")
-		print("STATUS: OFFLINE")
-		print("Sleeping for 5 seconds before attempting reconnection")
-		print("Failed to connect: " .. FailedToConnectAmount .. " times")
-		if FailedToConnectAmount % 5 == 0 then
-			if fs.exists("WebSocketAddress.txt") then
-				fs.delete("WebSocketAddress.txt")
-			end
-			shell.run("pastebin get " .. WebSocketFilePastebinID .. " WebSocketAddress.txt")
+	while true do
+		local status, res = pcall(websocketLoop)
+		if res == "Terminated" then
+			print("Imperial Turtle Control OS")
+			print("STATUS: OFFLINE")
+			print("Imperial Turtle Control OS Terminated!")
+			break
 		end
+		if ConnectionStatus == false then
+			FailedToConnectAmount = FailedToConnectAmount + 1
+			print("Imperial Turtle Control OS")
+			print("STATUS: OFFLINE")
+			print("Sleeping for 5 seconds before attempting reconnection")
+			print("Failed to connect: " .. FailedToConnectAmount .. " times")
+			if FailedToConnectAmount % 5 == 0 then
+				if fs.exists("WebSocketAddress.txt") then
+					fs.delete("WebSocketAddress.txt")
+				end
+				shell.run("pastebin get " .. WebSocketFilePastebinID .. " WebSocketAddress.txt")
+			end
+		end
+		os.sleep(5)
 	end
-	os.sleep(5)
 end
+
+main()
