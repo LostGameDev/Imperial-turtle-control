@@ -126,22 +126,33 @@ end
 
 local X,Y,Z = 0,0,0
 function websocketLoop()
+	-- read & sanitize server address from file (if present)
 	if fs.exists("WebSocketAddress.txt") then
-		local WebSocketFile = fs.open("WebSocketAddress.txt", "r")
-		WebsocketServer = WebSocketFile.readAll()
-		WebSocketFile.close()
+		local f = fs.open("WebSocketAddress.txt", "r")
+		local raw = f.readAll()
+		f.close()
+		-- strip leading/trailing whitespace and CR/LF
+		local addr = raw:match("^%s*(.-)%s*$")
+		-- remove any leading ws:// so we build the scheme explicitly
+		addr = addr:gsub("^%s*ws://", "")
+		-- also remove any trailing slash
+		addr = addr:gsub("/+$", "")
+		WebsocketServer = addr
 	end
 
-	if WebsocketServer == "" then
+	if WebsocketServer == "" or WebsocketServer == nil then
 		print("Invalid WebSocket address, retrying in 5 seconds...")
 		os.sleep(5)
 		return
 	end
 
-	local ws, err = http.websocket("ws://".. WebsocketServer)
-	print("Connecting to WebSocket at: " .. WebsocketServer)
+	-- construct URL explicitly and show it so you can see exactly what is attempted
+	local connectUrl = "ws://" .. WebsocketServer
+	print("Connecting to WebSocket at: " .. connectUrl)
+
+	local ws, err = http.websocket(connectUrl)
 	if err then
-		print("Connection failed: " .. err)
+		print("Connection failed:", err)
 		ConnectionStatus = false
 		return
 	elseif ws then
@@ -174,13 +185,13 @@ function websocketLoop()
 			elseif obj.type == 'mine' then
 				local status, res = pcall(mineTunnel, obj, ws)
 				ws.send(json.encode({data="end", nonce=obj.nonce}))
-            elseif obj.type == 'location' then
-                X,Y,Z = GetGPSLocation()
-                if X == nil then
-                    ws.send(json.encode({data="null", nonce=obj.nonce}))
-                else
-                    ws.send(json.encode({data={X,Y,Z}, nonce=obj.nonce}))
-                end
+			elseif obj.type == 'location' then
+				X,Y,Z = GetGPSLocation()
+				if X == nil then
+					ws.send(json.encode({data="null", nonce=obj.nonce}))
+				else
+					ws.send(json.encode({data={X,Y,Z}, nonce=obj.nonce}))
+				end
 			end
 		end
 	end
