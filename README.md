@@ -1,6 +1,6 @@
-# Turtle Control
-### Fork of [ottomated/turtle-gambit](https://github.com/ottomated/turtle-gambit)
-The plan of this fork is to update the dependencies as most of the current dependencies of the [ottomated/turtle-gambit](https://github.com/ottomated/turtle-gambit) repo is no longer maintained or supported, which causes issues during installation.
+# Imperial Turtle Control
+### Fork of [PrintedScript/turtle-control](https://github.com/PrintedScript/turtle-control) which is a fork of [ottomated/turtle-gambit](https://github.com/ottomated/turtle-gambit)
+The purpose of this fork is to bring improvements to the original turtle gambit. Notably adding support for mods such as AdvancedPeripherals and UnlimitedPeripheralWorks, and moving the control panel to be a godot application instead of a local webpage
 
 # Usage
 ### Prerequisites
