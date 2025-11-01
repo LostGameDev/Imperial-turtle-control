@@ -133,13 +133,13 @@ function websocketLoop()
 	end
 
 	local ws, err = http.websocket("ws://".. WebsocketServer .."/turtle")
- 
 	if err then
 		print("Connection failed: " .. err)
 		ConnectionStatus = false
+		return
 	elseif ws then
-		ConnectionStatus = true
 		FailedToConnectAmount = 0
+		ConnectionStatus = true
 		term.clear()
 		term.setCursorPos(1,1)
 		print("Imperial Turtle Control OS")
