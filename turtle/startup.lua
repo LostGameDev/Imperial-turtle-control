@@ -6,7 +6,7 @@
 -- Settings
 local ConnectionStatus = false
 local FailedToConnectAmount = 0
-local WebSocketFilePastebinID = ""
+local WebSocketFilePastebinID = "TUc9nU5i"
 local WebsocketServer = ""
 
 -- JSON LIBRARY
