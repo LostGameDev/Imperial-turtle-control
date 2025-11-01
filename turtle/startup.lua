@@ -132,7 +132,14 @@ function websocketLoop()
 		WebSocketFile.close()
 	end
 
+	if WebsocketServer == "" then
+		print("Invalid WebSocket address, retrying in 5 seconds...")
+		os.sleep(5)
+		return
+	end
+
 	local ws, err = http.websocket("ws://".. WebsocketServer)
+	print("Connecting to WebSocket at: " .. WebsocketServer)
 	if err then
 		print("Connection failed: " .. err)
 		ConnectionStatus = false
