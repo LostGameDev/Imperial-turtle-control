@@ -4,7 +4,7 @@
     https://github.com/PrintedScript/turtle-control
 ]]
 -- Settings
-local websocketServer = "ws://0.tcp.au.ngrok.io:19299"
+local websocketServer = "ws://f3cb885e5d00.ngrok-free.app"
 
 -- JSON LIBRARY
 if fs.exists("json_lib.lua") then
