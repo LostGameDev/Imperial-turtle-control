@@ -4,10 +4,7 @@
     https://github.com/PrintedScript/turtle-control
 ]]
 -- Settings
-local ConnectionStatus = false
-local FailedToConnectAmount = 0
-local WebSocketFilePastebinID = "TUc9nU5i"
-local WebsocketServer = ""
+local websocketServer = "ws://0.tcp.au.ngrok.io:19299"
 
 -- JSON LIBRARY
 if fs.exists("json_lib.lua") then
@@ -123,46 +120,19 @@ function mineTunnel(obj, ws)
 	end
 	return blocks
 end
-
 local X,Y,Z = 0,0,0
 function websocketLoop()
-	-- read & sanitize server address from file (if present)
-	if fs.exists("WebSocketAddress.txt") then
-		local f = fs.open("WebSocketAddress.txt", "r")
-		local raw = f.readAll()
-		f.close()
-		-- strip leading/trailing whitespace and CR/LF
-		local addr = raw:match("^%s*(.-)%s*$")
-		-- remove any leading ws:// so we build the scheme explicitly
-		addr = addr:gsub("^%s*ws://", "")
-		-- also remove any trailing slash
-		addr = addr:gsub("/+$", "")
-		WebsocketServer = addr
-	end
-
-	if WebsocketServer == "" or WebsocketServer == nil then
-		print("Invalid WebSocket address, retrying in 5 seconds...")
-		os.sleep(5)
-		return
-	end
-
-	-- construct URL explicitly and show it so you can see exactly what is attempted
-	local connectUrl = "ws://" .. WebsocketServer
-	print("Connecting to WebSocket at: " .. connectUrl)
-
-	local ws, err = http.websocket(connectUrl)
+	
+	local ws, err = http.websocket(websocketServer)
+ 
 	if err then
-		print("Connection failed:", err)
-		ConnectionStatus = false
-		return
+		print(err)
 	elseif ws then
-		FailedToConnectAmount = 0
-		ConnectionStatus = true
-		term.clear()
-		term.setCursorPos(1,1)
-		print("Imperial Turtle Control OS")
-		print("STATUS: ONLINE")
 		while true do
+			term.clear()
+			term.setCursorPos(1,1)
+			print("Turtle Control OS, originally created by Ottomated. Modified by PrintedScript")
+            print("View the project on github! https://github.com/PrintedScript/turtle-control")
 			local message = ws.receive()
 			if message == nil then
 				break
@@ -170,7 +140,6 @@ function websocketLoop()
 			local obj = json.decode(message)
 			if obj.type == 'eval' then
 				local func = loadstring(obj['function'])
-				---@diagnostic disable-next-line: need-check-nil
 				local result = func()
 				ws.send(json.encode({data=result, nonce=obj.nonce}))
 			elseif obj.type == 'mitosis' then
@@ -185,51 +154,29 @@ function websocketLoop()
 			elseif obj.type == 'mine' then
 				local status, res = pcall(mineTunnel, obj, ws)
 				ws.send(json.encode({data="end", nonce=obj.nonce}))
-			elseif obj.type == 'location' then
-				X,Y,Z = GetGPSLocation()
-				if X == nil then
-					ws.send(json.encode({data="null", nonce=obj.nonce}))
-				else
-					ws.send(json.encode({data={X,Y,Z}, nonce=obj.nonce}))
-				end
+            elseif obj.type == 'location' then
+                X,Y,Z = GetGPSLocation()
+                if X == nil then
+                    ws.send(json.encode({data="null", nonce=obj.nonce}))
+                else
+                    ws.send(json.encode({data={X,Y,Z}, nonce=obj.nonce}))
+                end
 			end
 		end
 	end
 	if ws then
 		ws.close()
-		print("Imperial Turtle Control OS")
-		print("STATUS: OFFLINE")
-		ConnectionStatus = false
 	end
 end
 
-function main()
-	turtle.refuel(64)
+while true do
+	local status, res = pcall(websocketLoop)
 	term.clear()
-	term.setCursorPos(1, 1)
-	while true do
-		local status, res = pcall(websocketLoop)
-		if res == "Terminated" then
-			print("Imperial Turtle Control OS")
-			print("STATUS: OFFLINE")
-			print("Imperial Turtle Control OS Terminated!")
-			break
-		end
-		if ConnectionStatus == false then
-			FailedToConnectAmount = FailedToConnectAmount + 1
-			print("Imperial Turtle Control OS")
-			print("STATUS: OFFLINE")
-			print("Sleeping for 5 seconds before attempting reconnection")
-			print("Failed to connect: " .. FailedToConnectAmount .. " times")
-			if FailedToConnectAmount % 5 == 0 then
-				if fs.exists("WebSocketAddress.txt") then
-					fs.delete("WebSocketAddress.txt")
-				end
-				shell.run("pastebin get " .. WebSocketFilePastebinID .. " WebSocketAddress.txt")
-			end
-		end
-		os.sleep(5)
+	term.setCursorPos(1,1)
+	if res == 'Terminated' then
+		print("Turtle Control OS terminated")
+		break
 	end
+	print("Sleeping for 5 seconds before attempting reconnection - Turtle Control OS - https://github.com/PrintedScript/turtle-control")
+	os.sleep(5)
 end
-
-main()
