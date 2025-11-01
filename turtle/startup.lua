@@ -209,12 +209,12 @@ while true do
 		print("STATUS: OFFLINE")
 		print("Sleeping for 5 seconds before attempting reconnection")
 		print("Failed to connect: " .. FailedToConnectAmount .. " times")
-	end
-	if FailedToConnectAmount % 5 == 0 then
-		if fs.exists("WebSocketAddress.txt") then
-			fs.delete("WebSocketAddress.txt")
+		if FailedToConnectAmount % 5 == 0 then
+			if fs.exists("WebSocketAddress.txt") then
+				fs.delete("WebSocketAddress.txt")
+			end
+			shell.run("pastebin get " .. WebSocketFilePastebinID .. " WebSocketAddress.txt")
 		end
-		shell.run("pastebin get " .. WebSocketFilePastebinID .. " WebSocketAddress.txt")
 	end
 	os.sleep(5)
 end
